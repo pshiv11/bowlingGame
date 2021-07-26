@@ -30,12 +30,20 @@ public class Frame {
 		this.isSpare = true;
 	}
 	
-	public Score getScoreObj() {
-		return this.frameScore;
+	public int getScore() {
+		return this.frameScore.getScore();
+	}
+	public void setScore(int i) {
+		this.frameScore.setScore(i);
 	}
 	
-	public void setFrameStatus(boolean b) {
-		this.frameStatus= b;
+	public void setFrameStatus(String str) {
+		if(str.equals("closed")) {
+			this.frameStatus= true;
+		}
+		else if (str.equals("open")){
+			this.frameStatus = false;
+		}
 	}
 	
 	public boolean isFrameClosed() {
@@ -56,8 +64,8 @@ public class Frame {
 		return this.rollCounter;
 	}
 	
-	public int getRollValue(int index) {
-		return this.rolls[index].getValue();
+	public int getRollScore(int index) {
+		return this.rolls[index].getScore();
 		
 	}
 

@@ -42,7 +42,7 @@ public class Game {
 		}
 		
 		else if(isSpare(down)) {
-			int rollOne = this.frames[this.frameCounter].getRollValue(0);
+			int rollOne = this.frames[this.frameCounter].getRollScore(0);
 			frame.add(rollCount, (10 - rollOne));
 			frame.setSpare();
 			this.incrementFrameCounter();
@@ -65,6 +65,7 @@ public class Game {
 				frame.incrementRollCounter();
 			}
 			else {
+				
 				this.incrementFrameCounter();
 			}
 			
@@ -79,48 +80,158 @@ public class Game {
 		return str.equals("Spare");
 	}
 	
-	
-	public int getPreviousFrameScore(int pinsDown) {
-		if(this.frameCounter > 0) {
-		 Frame currentFrame = this.frames[this.frameCounter];
-		 Frame previousFrame = this.frames[this.frameCounter - 1];
-		 if(previousFrame.isStrike && currentFrame.getRollCounter()==0) {
-			 int prevScore = previousFrame.getScoreObj().getScore();
-			previousFrame.getScoreObj().setScore(prevScore + pinsDown);
-		 }
-			
-			
-			
-			
-		}
-		return 0;
-	}
+
 	
 	public void computeScore() {
-		for(int i = 0; i < this.frameCounter; i++) {
-			
+		
+		
+		// if only one frame exist
+		if(this.frameCounter == 0) {
+			int finalScore = this.finalScore.getScore();
+			Frame currentFrame = this.frames[0];
+			if(currentFrame.isStrike || currentFrame.isSpare) {
+				currentFrame.setScore(finalScore + 10 );
+				this.finalScore.setScore(finalScore + currentFrame.getScore());
+				currentFrame.setFrameStatus("open");
+			}
+			else {
+				currentFrame.setScore(currentFrame.getRollScore(0) + currentFrame.getRollScore(1));
+				this.finalScore.setScore(finalScore + currentFrame.getScore());
+				currentFrame.setFrameStatus("closed");
+			}
 		}
+		//more than one frame exist
+		else {
+			
+			for(int i = 0; i < this.frameCounter; i++) {	
+				int finalScore = this.finalScore.getScore();
+				Frame currentFrame = this.frames[i];
+				Frame nextFrame = this.frames[i+1];
+				if(i+1 != 9) {
+						if(!currentFrame.isFrameClosed()) {
+							if(currentFrame.isStrike && !nextFrame.isStrike && !nextFrame.isSpare) {
+								currentFrame.setScore(finalScore + 10 + nextFrame.getRollScore(0) + nextFrame.getRollScore(1));
+								this.finalScore.setScore(finalScore + currentFrame.getScore());
+								currentFrame.setFrameStatus("closed");
+							}
+							else if(currentFrame.isStrike && nextFrame.isSpare) {
+								currentFrame.setScore(this.finalScore.getScore() + 10 + 10);
+								this.finalScore.setScore(this.finalScore.getScore() + 10 + 10);
+								currentFrame.setFrameStatus("closed");
+							}
+							else if(currentFrame.isStrike && nextFrame.isStrike) {
+								//check to see if next to next frame exist?
+								if(this.frames[i+2].getRollScore(0) != -1) {
+									//next to next frame exist
+									currentFrame.setScore(finalScore + 10 + this.frames[i+2].getRollScore(0));
+									this.finalScore.setScore(finalScore + currentFrame.getScore());
+									currentFrame.setFrameStatus("closed");
+								}
+								else {
+									//next to next frame does not exist
+									currentFrame.setScore(finalScore + 10);
+									currentFrame.setFrameStatus("open");
+								}	
+							}				
+							else if(currentFrame.isSpare) {
+								currentFrame.setScore(finalScore + nextFrame.getRollScore(0));
+								this.finalScore.setScore(finalScore + currentFrame.getScore());
+								currentFrame.setFrameStatus("closed");
+							}
+							else {
+								currentFrame.setFrameStatus("open");
+								if(currentFrame.getRollCounter() >= 1) {
+									currentFrame.setScore(finalScore + currentFrame.getRollScore(0) + currentFrame.getRollScore(1));
+									currentFrame.setFrameStatus("closed");
+								}
+							}
+						}	
+						else {
+							//frame is closed. move to next frame
+						}
+				}
+				//next frame is the last frame
+				else {
+					if(!currentFrame.isFrameClosed()) {
+						if(currentFrame.isStrike && nextFrame.isStrike) {
+							if(nextFrame.getRollScore(1) == -1) {
+								currentFrame.setScore(finalScore + 10);
+								this.finalScore.setScore(finalScore + currentFrame.getScore());
+								currentFrame.setFrameStatus("open");
+							}
+							else if(nextFrame.getRollScore(1) != -1) {
+								currentFrame.setScore(finalScore + 10 + nextFrame.getRollScore(1));
+								this.finalScore.setScore(finalScore + currentFrame.getScore());
+								currentFrame.setFrameStatus("closed");
+							}	
+						}
+						else if(currentFrame.isStrike && nextFrame.isSpare) {
+							currentFrame.setScore(finalScore + 10 + 10);
+							this.finalScore.setScore(finalScore + currentFrame.getScore());
+							currentFrame.setFrameStatus("closed");
+						}
+						else if(currentFrame.isSpare) {
+							currentFrame.setScore(finalScore + nextFrame.getRollScore(0) );
+							this.finalScore.setScore(finalScore + currentFrame.getScore());
+							currentFrame.setFrameStatus("closed");
+						}
+						else {
+							currentFrame.setFrameStatus("open");
+							if(currentFrame.getRollCounter() >= 1) {
+								currentFrame.setScore(finalScore + currentFrame.getRollScore(0) + currentFrame.getRollScore(1));
+								currentFrame.setFrameStatus("closed");
+							}
+						}
+					}
+					//next frame is the last frame
+					else {
+						nextFrame.setFrameStatus("open");
+						if(nextFrame.isStrike && (nextFrame.getRollCounter() >= 2)) {
+							nextFrame.setScore(finalScore + 10 +  nextFrame.getRollScore(1) + nextFrame.getRollScore(2));
+							this.finalScore.setScore(finalScore + nextFrame.getScore());
+							nextFrame.setFrameStatus("closed");
+							
+						}
+						else if(nextFrame.isSpare && (nextFrame.getRollCounter() >= 2)) {
+							nextFrame.setScore(finalScore + 10 +  nextFrame.getRollScore(2));
+							this.finalScore.setScore(finalScore + nextFrame.getScore());
+							nextFrame.setFrameStatus("closed");
+						}
+						else {
+							if(nextFrame.getRollCounter() >= 1) {
+								nextFrame.setScore(finalScore + nextFrame.getRollScore(0) + nextFrame.getRollScore(1));
+								this.finalScore.setScore(finalScore + nextFrame.getScore());
+								nextFrame.setFrameStatus("closed");
+							}
+						}
+					}
+					
+				}
+					
+			}
+		}
+	
 	}
 	
 	
 	public void print() {
 		for(int i = 0; i < 10; i++) {
 			
-			if(this.frames[i].getRollValue(0) >= 0) {
+			if(this.frames[i].getRollScore(0) >= 0) {
 				System.out.print(" " + "Frame " + i + " Roll 1 = ");
-				System.out.print(this.frames[i].getRollArray()[0].getValue());
+				System.out.print(this.frames[i].getRollScore(0));
 				System.out.println();
 				
 			}
-			if(this.frames[i].getRollValue(1) >= 0) {
+			if(this.frames[i].getRollScore(1) >= 0) {
 				System.out.print(" " + "Frame " + i + " Roll 2 = ");
-				System.out.print(this.frames[i].getRollArray()[1].getValue());
+				System.out.print(this.frames[i].getRollScore(1));
 				System.out.println();
 			}
 			
 			if(i == 9) {
 				System.out.print(" " + "Frame " + i + " Roll 3 = ");
-				System.out.print(this.frames[i].getRollArray()[2].getValue());
+				System.out.print(this.frames[i].getRollScore(2));
 				System.out.println();
 			}
 			

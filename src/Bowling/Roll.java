@@ -17,7 +17,7 @@ public class Roll  {
 	}
 
 
-	public int getValue() {
+	public int getScore() {
 		// TODO Auto-generated method stub
 		return this.pinsDown;
 	}
