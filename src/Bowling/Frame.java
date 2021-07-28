@@ -13,12 +13,21 @@ public class Frame {
 	boolean isSpare;
 	
 	public Frame() {
-		this.rolls = new Roll[3];
+		this.rolls = new Roll[2];
 		this.rollCounter = 0;
 		this.frameScore = new Score();
 		this.frameStatus = false;
-		for(int i = 0; i < 3; i++) {
+		for(int i = 0; i < 2; i++) {
 			this.rolls[i] = new Roll();
+		}
+	}
+	public Frame(int i) {
+		this.rolls = new Roll[i];
+		this.rollCounter = 0;
+		this.frameScore = new Score();
+		this.frameStatus = false;
+		for(int j = 0; j < i; j++) {
+			this.rolls[j] = new Roll();
 		}
 	}
 	

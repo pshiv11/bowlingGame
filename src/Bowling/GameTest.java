@@ -25,7 +25,37 @@ public class GameTest {
 		bowling.roll("8");
 		bowling.roll("1");
 		
+//		bowling.roll("Strike");
+//		bowling.roll("Strike");
+//		bowling.roll("Strike");
+//		bowling.roll("Strike");
+//		bowling.roll("Strike");
+//		bowling.roll("Strike");
+//		bowling.roll("Strike");
+//		bowling.roll("Strike");
+//		bowling.roll("Strike");
+//		bowling.roll("Strike");
 		
+//		bowling.roll("1");
+//		bowling.roll("Spare");
+//		bowling.roll("1");
+//		bowling.roll("Spare");
+//		bowling.roll("1");
+//		bowling.roll("Spare");
+//		bowling.roll("1");
+//		bowling.roll("Spare");
+//		bowling.roll("1");
+//		bowling.roll("Spare");
+//		bowling.roll("1");
+//		bowling.roll("Spare");
+//		bowling.roll("1");
+//		bowling.roll("Spare");
+//		bowling.roll("1");
+//		bowling.roll("Spare");
+//		bowling.roll("1");
+//		bowling.roll("Spare");
+//		bowling.roll("1");
+//		bowling.roll("Spare");
 		bowling.print();
 		// adding to git
 	}
