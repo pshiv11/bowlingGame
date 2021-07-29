@@ -45,6 +45,7 @@ public class Game {
 			
 			currentFrame.add(rollCount, 10);
 			currentFrame.setStrike();
+			computeScore();
 			this.incrementFrameCounter();
 		}
 		
@@ -52,11 +53,13 @@ public class Game {
 			int rollOne = currentFrame.getRollScore(0);
 			currentFrame.add(rollCount, (10 - rollOne));
 			currentFrame.setSpare();
+			computeScore();
 			this.incrementFrameCounter();
 		}
 		
 		else if(down.equals("Miss")){
 			currentFrame.add(rollCount, 0);
+			computeScore();
 			if(currentFrame.getRollCounter() == 0) {
 				 
 				currentFrame.incrementRollCounter();
@@ -69,6 +72,7 @@ public class Game {
 		}
 		else {
 			currentFrame.add(rollCount, Integer.parseInt(down));
+			computeScore();
 			if(currentFrame.getRollCounter() == 0) {
 				
 				currentFrame.incrementRollCounter();
@@ -87,91 +91,148 @@ public class Game {
 		return str.equals("Spare");
 	}
 	
-
 	
+	public void checkPreviousFramesScore() {
+		Frame previousFrame = this.frames[this.frameCounter - 1];
+		Frame currentFrame = this.frames[this.frameCounter];
+		
+		//previous of previous frame exists
+		if(this.frameCounter > 1) {
+			Frame previousOfPrevious = this.frames[this.frameCounter - 2];
+			if(!previousOfPrevious.isFrameClosed()) {
+				//if previous of previous frame is not closed than previous frame has to be strike
+				if(previousFrame.isStrike) { //no need to check this condition
+					previousOfPrevious.setScore(previousOfPrevious.getScore() +  currentFrame.getRollScore(0));
+					this.finalScore.setScore(this.finalScore.getScore() + previousOfPrevious.getScore());
+					previousOfPrevious.setFrameStatus("closed");
+					System.out.println("Final Score = " + this.finalScore.getScore());
+				}
+			}
+		}
+		//if previous frame is not closed
+		if(!previousFrame.isFrameClosed()) {
+			if(previousFrame.isStrike && currentFrame.getRollCounter() == 0) {
+				previousFrame.setScore(previousFrame.getScore() + currentFrame.getRollScore(0));
+			}
+			else if(previousFrame.isStrike && currentFrame.getRollCounter() == 1) {
+				previousFrame.setScore(previousFrame.getScore() + currentFrame.getRollScore(1));
+				previousFrame.setFrameStatus("closed");
+				this.finalScore.setScore(this.finalScore.getScore() + previousFrame.getScore());
+				System.out.println("Final Score = " + this.finalScore.getScore());
+			}
+			else if(previousFrame.isSpare && currentFrame.getRollCounter() == 0) {
+				previousFrame.setScore(previousFrame.getScore() + currentFrame.getRollScore(0));
+				previousFrame.setFrameStatus("closed");
+				this.finalScore.setScore(this.finalScore.getScore() + previousFrame.getScore());
+				System.out.println("Final Score = " + this.finalScore.getScore());
+			}
+			
+		}
+	
+	}
+	
+	public void lastFrameScore() {
+		Frame currentFrame = this.frames[this.frameCounter];
+		//this.checkPreviousFramesScore();
+	
+		//******************Calculate last frame score*************//
+		if(currentFrame.isStrike || currentFrame.isSpare) {
+			if(currentFrame.getRollCounter() == 0) {
+				currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(0));
+					
+			}
+			else if(currentFrame.getRollCounter() == 1) {
+				currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(1));
+				
+			}
+			else if(currentFrame.getRollCounter() == 2) {
+				currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(2));
+				this.finalScore.setScore(this.finalScore.getScore() + currentFrame.getScore());
+				System.out.println("Final Score = " + this.finalScore.getScore());
+				currentFrame.setFrameStatus("closed");
+			}
+			
+		}
+		else {
+			if(currentFrame.getRollCounter() == 0) {
+				currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(0));
+				
+			}
+			else if(currentFrame.getRollCounter() == 1 && !currentFrame.isSpare) {
+				currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(1));
+				this.finalScore.setScore(this.finalScore.getScore() + currentFrame.getScore());
+				System.out.println("Final Score = " + this.finalScore.getScore());
+				currentFrame.setFrameStatus("closed");
+			}	
+			
+		}
+	}
+
 	public void computeScore() {
 		int numOfFrames = this.frameCounter;
-		int finalScore = this.finalScore.getScore();
+
 		//only one frame exists
-		if(numOfFrames == 1) {
+		if(numOfFrames == 0) {
 			Frame currentFrame = this.frames[this.frameCounter];
-			int currentFrameScore = currentFrame.getScore();
+			
 			
 			if(currentFrame.isStrike) {
-				currentFrame.setScore(10);
-				currentFrame.setFrameStatus("open");	
+				currentFrame.setScore(currentFrame.getRollScore(0));
 			}
 			else {
 				if(currentFrame.getRollCounter() == 0) {
 					currentFrame.setScore(currentFrame.getRollScore(0));
 				}
 				else if(currentFrame.getRollCounter() == 1 && currentFrame.isSpare) {
-					currentFrame.setScore(currentFrameScore + currentFrame.getRollScore(1));
+					currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(1));
 				}
-				else {
-					currentFrame.setScore(currentFrameScore + currentFrame.getRollScore(1));
+				else if(currentFrame.getRollCounter() == 1 && !currentFrame.isSpare){
+					currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(1));
 					currentFrame.setFrameStatus("closed");
-					this.finalScore.setScore(finalScore + currentFrameScore);
+					this.finalScore.setScore(currentFrame.getScore());
+					System.out.println("Final Score = " + this.finalScore.getScore());
 				}
-			}
+			}	
 			
 		}
 		//more than one frame exists
 		else {
-			//******************Calculate special previous frame score*************//
-			Frame previousFrame = this.frames[this.frameCounter - 1];
+			//******************Calculate special previous frame score (another method)*************//
+			
+			//Frame previousFrame = this.frames[this.frameCounter - 1];
 			Frame currentFrame = this.frames[this.frameCounter];
 			
-			//previous of previous frame exists
-			if(this.frameCounter > 2) {
-				Frame previousOfPrevious = this.frames[this.frameCounter - 2];
-				if(!previousOfPrevious.isFrameClosed()) {
-					//if previous of previous frame is not closed than previous frame has to be strike
-					if(previousFrame.isStrike) { //no need to check this condition
-						previousOfPrevious.setScore(previousOfPrevious.getScore() + 10 + currentFrame.getRollScore(0));
-						previousOfPrevious.setFrameStatus("closed");
-						this.finalScore.setScore(finalScore + previousOfPrevious.getScore());
-					}
-				}
-			}
-			//if previous frame is not closed
-			if(!previousFrame.isFrameClosed()) {
-				if(previousFrame.isStrike && currentFrame.getRollCounter() == 0) {
-					previousFrame.setScore(previousFrame.getScore() + currentFrame.getRollScore(0));
-				}
-				else if(previousFrame.isStrike && currentFrame.getRollCounter() == 1) {
-					previousFrame.setScore(previousFrame.getScore() + currentFrame.getRollScore(1));
-					previousFrame.setFrameStatus("closed");
-					this.finalScore.setScore(finalScore + previousFrame.getScore());
-				}
-				else if(previousFrame.isSpare && currentFrame.getRollCounter() == 0) {
-					previousFrame.setScore(previousFrame.getScore() + currentFrame.getRollScore(1));
-					previousFrame.setFrameStatus("closed");
-					this.finalScore.setScore(finalScore + previousFrame.getScore());
-				}
-			}
 			
 			
 			//******************Calculate current frame score*************//
-			if(currentFrame.isStrike) {
-				currentFrame.setScore(10);
+			if(this.frameCounter == 9) {
+				this.checkPreviousFramesScore();
+				this.lastFrameScore();
 			}
 			else {
-				if(currentFrame.getRollCounter() == 0) {
-					currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(0));
-				}
-				else if(currentFrame.getRollCounter() == 1 && currentFrame.isSpare) {
-					currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(1));
+				this.checkPreviousFramesScore();
+				if(currentFrame.isStrike) {
+					currentFrame.setScore(currentFrame.getRollScore(0));
 				}
 				else {
-					currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(1));
-					currentFrame.setFrameStatus("closed");
-					this.finalScore.setScore(finalScore + currentFrame.getScore());
+					if(currentFrame.getRollCounter() == 0) {
+						currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(0));
+					}
+					else if(currentFrame.getRollCounter() == 1 && currentFrame.isSpare) {
+						currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(1));
+					}
+					else if(currentFrame.getRollCounter() == 1 && !currentFrame.isSpare) {	
+						currentFrame.setScore(currentFrame.getScore() + currentFrame.getRollScore(1));
+						this.finalScore.setScore(this.finalScore.getScore() + currentFrame.getScore());
+						System.out.println("Final Score = " + this.finalScore.getScore());
+						currentFrame.setFrameStatus("closed");
+					}	
+					
 				}
 				
-			}	
+			}
+				
 		}
-	
 	}
 	
 	public void print() {
@@ -194,9 +255,10 @@ public class Game {
 				System.out.print(this.frames[i].getRollScore(2));
 				System.out.println();
 			}
-			//System.out.println("Frames " + i + " Score = " + this.frames[i].getScore());
+		//	System.out.println("Frames " + i + " Score = " + this.frames[i].getScore());
 			
 		}
+		//System.out.println("FINAL SCORE = " + this.finalScore.getScore());
 	}
 	
 }
